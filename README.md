@@ -1,6 +1,8 @@
-# jade
+# JDE
 
-A collection of c++ utilities I use a lot
+(pronounced "jade")
+
+A dumping ground of c++ utilities I have written that I use a lot
 
 # features
 
