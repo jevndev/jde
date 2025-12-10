@@ -7,10 +7,16 @@
 # |  $$$$$$/|  $$$$$$/| $$ \  $$| $$       /$$$$$$|  $$$$$$/
 #  \______/  \______/ |__/  \__/|__/      |______/ \______/
 cmake_minimum_required(VERSION 3.22)
+
+set(CMAKE_C_COMPILER "/usr/bin/clang-19")
+set(CMAKE_CXX_COMPILER "/usr/bin/clang++-19")
+
 project(project VERSION 0.0)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 
 #   /$$$$$$   /$$$$$$  /$$   /$$ /$$$$$$$   /$$$$$$  /$$$$$$$$  /$$$$$$
 #  /$$__  $$ /$$__  $$| $$  | $$| $$__  $$ /$$__  $$| $$_____/ /$$__  $$
@@ -31,31 +37,31 @@ file(GLOB_RECURSE SOURCES "src/*.cpp")
 #    | $$   | $$$$$$$$|  $$$$$$/   | $$    /$$$$$$| $$ \  $$|  $$$$$$/
 #    |__/   |________/ \______/    |__/   |______/|__/  \__/ \______/
 
-include(FetchContent)
-FetchContent_Declare(
-    googletest
-    URL https://github.com/google/googletest/archive/df1544bcee0c7ce35cd5ea0b3eb8cc81855a4140.zip
-)
+# include(FetchContent)
+# FetchContent_Declare(
+#     googletest
+#     URL https://github.com/google/googletest/archive/df1544bcee0c7ce35cd5ea0b3eb8cc81855a4140.zip
+# )
 
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
+# set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+# FetchContent_MakeAvailable(googletest)
 
-enable_testing()
+# enable_testing()
 
-FILE(GLOB_RECURSE TEST_SOURCES "test/*.cpp")
+# FILE(GLOB_RECURSE TEST_SOURCES "test/*.cpp")
 
-add_executable(
-    run_tests
-    ${TEST_SOURCES}
-)
+# add_executable(
+#     run_tests
+#     ${TEST_SOURCES}
+# )
 
-target_link_libraries(
-    run_tests
-    GTest::gtest_main
-)
+# target_link_libraries(
+#     run_tests
+#     GTest::gtest_main
+# )
 
-include(GoogleTest)
-gtest_discover_tests(run_tests)
+# include(GoogleTest)
+# gtest_discover_tests(run_tests)
 
 #  /$$       /$$$$$$ /$$$$$$$   /$$$$$$
 # | $$      |_  $$_/| $$__  $$ /$$__  $$
@@ -75,4 +81,4 @@ gtest_discover_tests(run_tests)
 #    | $$  | $$  | $$| $$  \ $$| $$  \ $$| $$         | $$
 #    | $$  | $$  | $$| $$  | $$|  $$$$$$/| $$$$$$$$   | $$
 #    |__/  |__/  |__/|__/  |__/ \______/ |________/   |__/
-add_executable(out ${SOURCES})
+add_executable(jade ${SOURCES})
