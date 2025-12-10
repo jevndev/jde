@@ -82,3 +82,4 @@ file(GLOB_RECURSE SOURCES "src/*.cpp")
 #    | $$  | $$  | $$| $$  | $$|  $$$$$$/| $$$$$$$$   | $$
 #    |__/  |__/  |__/|__/  |__/ \______/ |________/   |__/
 add_executable(jade ${SOURCES})
+target_include_directories(jade PRIVATE ${CMAKE_SOURCE_DIR}/src)
