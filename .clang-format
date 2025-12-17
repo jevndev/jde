@@ -1,0 +1,9 @@
+---
+BasedOnStyle: LLVM
+TabWidth: 4
+IndentWidth: 4
+UseTab: Never
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: false
+AllowAllArgumentsOnNextLine: false
+AccessModifierOffset: -4
