@@ -11,17 +11,16 @@ struct cumulative_sum_view : public std::ranges::view_interface<cumulative_sum_v
 {
 public:
   using T = std::ranges::range_value_t<V>;
-  using UnderlyingIteratorT = std::ranges::iterator_t<V>;
 
+  template <bool Const>
   class Iter
   {
   public:
-    using difference_type = UnderlyingIteratorT::difference_type;
+    using UnderlyingIteratorT = std::ranges::iterator_t<std::conditional_t<Const, const V, V>>;
+    using difference_type = typename UnderlyingIteratorT::difference_type;
     using value_type = T;
 
-    constexpr explicit Iter() noexcept = default;
-
-    constexpr explicit Iter(const UnderlyingIteratorT& it, const UnderlyingIteratorT& end) noexcept
+    constexpr explicit Iter(UnderlyingIteratorT it, UnderlyingIteratorT end) noexcept
         : m_curr { it }, m_end { end }
     {
       if (m_curr != m_end)
@@ -77,8 +76,8 @@ public:
   {
   }
 
-  template <typename Self>
-  [[nodiscard]] constexpr auto begin(this Self&& self) {return Iter{std::ranges::begin(std::forward<Self>(self).m_range), std::ranges::end(std::forward<Self>(self).m_range)};}
+  [[nodiscard]] constexpr auto begin() {return Iter<false>{std::ranges::begin(m_range), std::ranges::end(m_range)};}
+  [[nodiscard]] constexpr auto begin() const {return Iter<true>{std::ranges::begin(m_range), std::ranges::end(m_range)};}
   [[nodiscard]] constexpr auto end() const {return std::default_sentinel;}
 
 private:
