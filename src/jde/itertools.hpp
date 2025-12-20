@@ -1,6 +1,9 @@
 #pragma once
 
+#include <algorithm>
 #include <ranges>
+
+#include "jde/metaprogramming.hpp"
 
 namespace jde {
 
@@ -125,5 +128,36 @@ public:
 
 template <typename T>
 cumulative_sum(T) -> cumulative_sum<T>;
+
+template <std::ranges::viewable_range R>
+constexpr auto sum(R &&r) {
+    using T = std::ranges::range_value_t<R>;
+    return std::ranges::fold_left(std::move(r), T{}, std::plus<T>{});
+}
+
+template <typename... Pipelines>
+class split_pipeline : public std::ranges::range_adaptor_closure<split_pipeline<Pipelines...>> {
+public:
+    constexpr split_pipeline(Pipelines &&...pipelines)
+        : m_pipelines{std::forward<Pipelines>(pipelines)...} {};
+
+    template <std::ranges::viewable_range R>
+        requires jde::is_tuple_like<std::ranges::range_value_t<R>>
+    constexpr auto operator()(R &&r) const {
+        return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
+            auto get_nth = [&]<std::size_t I> {
+                return std::forward<R>(r) | std::views::transform(std::get<I>) |
+                       std::get<I>(m_pipelines);
+            };
+            return std::views::zip(get_nth.template operator()<Is>()...);
+        }(std::make_index_sequence<sizeof...(Pipelines)>{});
+    }
+
+private:
+    std::tuple<Pipelines...> m_pipelines;
+};
+
+template <typename... Pipelines>
+split_pipeline(Pipelines &&...) -> split_pipeline<Pipelines...>;
 
 } // namespace jde
