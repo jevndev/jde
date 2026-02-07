@@ -142,7 +142,7 @@ public:
         : m_pipelines{std::forward<Pipelines>(pipelines)...} {};
 
     template <std::ranges::viewable_range R>
-        requires jde::is_tuple_like<std::ranges::range_value_t<R>>
+        requires jde::Tuple<std::ranges::range_value_t<R>>
     constexpr auto operator()(R &&r) const {
         return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
             auto get_nth = [&]<std::size_t I> {

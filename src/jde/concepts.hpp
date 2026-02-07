@@ -23,6 +23,6 @@ concept NonEmptyTuple = requires(T t) {
 };
 
 template <typename T>
-concept is_tuple_like = EmptyTuple<T> || NonEmptyTuple<T>;
+concept Tuple = EmptyTuple<T> || NonEmptyTuple<T>;
 
 } // namespace jde
