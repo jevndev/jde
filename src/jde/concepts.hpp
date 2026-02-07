@@ -1,7 +1,9 @@
 #pragma once
 
 #include <concepts>
+#include <ostream>
 #include <type_traits>
+#include <utility>
 
 #include "metaprogramming.hpp"
 
@@ -29,6 +31,16 @@ concept Tuple = EmptyTuple<T> || NonEmptyTuple<T>;
 template <typename T>
 concept Hashable = requires(T t) {
     { std::hash<T>{}(t) } -> std::convertible_to<size_t>;
+};
+
+template <typename T>
+concept OStreamable = requires(T t) {
+    { std::declval<std::ostream &>() << t } -> std::convertible_to<std::ostream &>;
+};
+
+template <typename T>
+concept IStreamable = requires(T t) {
+    { std::declval<std::istream &>() >> t } -> std::convertible_to<std::istream &>;
 };
 
 } // namespace jde
