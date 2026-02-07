@@ -49,19 +49,6 @@ using ObjectType = typename detail::GetObjType<decltype(Method)>::Type;
 
 } // namespace MemberFunction
 
-template <typename T>
-concept is_empty_tuple_like = (std::tuple_size_v<T> == 0);
-
-template <typename T>
-concept is_nonempty_tuple_like = requires(T t) {
-    std::tuple_element_t<0, T>{};
-    std::get<0>(t);
-    std::tuple_size_v<T>;
-};
-
-template <typename T>
-concept is_tuple_like = is_empty_tuple_like<T> || is_nonempty_tuple_like<T>;
-
 template<typename T, template<typename...> typename Primary>
 inline constexpr bool is_specialization_of_v = detail::is_specialization_of<T, Primary>::value;
 

@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <ranges>
 
-#include "jde/metaprogramming.hpp"
+#include "jde/concepts.hpp"
 
 namespace jde {
 
