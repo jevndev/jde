@@ -66,5 +66,6 @@
     "clangd.path": "/usr/bin/clangd-19",
     "clangd.arguments": [
         "--query-driver=/usr/bin/clang++-19"
-    ]
+    ],
+    "editor.formatOnSave": true
 }
