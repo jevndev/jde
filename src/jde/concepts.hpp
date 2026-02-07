@@ -1,5 +1,6 @@
 #pragma once
 
+#include <concepts>
 #include <type_traits>
 
 #include "metaprogramming.hpp"
@@ -24,5 +25,10 @@ concept NonEmptyTuple = requires(T t) {
 
 template <typename T>
 concept Tuple = EmptyTuple<T> || NonEmptyTuple<T>;
+
+template <typename T>
+concept Hashable = requires(T t) {
+    { std::hash<T>{}(t) } -> std::convertible_to<size_t>;
+};
 
 } // namespace jde
