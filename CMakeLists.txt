@@ -37,31 +37,34 @@ file(GLOB_RECURSE SOURCES "src/*.cpp")
 #    | $$   | $$$$$$$$|  $$$$$$/   | $$    /$$$$$$| $$ \  $$|  $$$$$$/
 #    |__/   |________/ \______/    |__/   |______/|__/  \__/ \______/
 
-# include(FetchContent)
-# FetchContent_Declare(
-#     googletest
-#     URL https://github.com/google/googletest/archive/df1544bcee0c7ce35cd5ea0b3eb8cc81855a4140.zip
-# )
+include(FetchContent)
+FetchContent_Declare(
+    googletest
+    URL https://github.com/google/googletest/archive/df1544bcee0c7ce35cd5ea0b3eb8cc81855a4140.zip
+)
 
-# set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-# FetchContent_MakeAvailable(googletest)
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
 
-# enable_testing()
+enable_testing()
 
-# FILE(GLOB_RECURSE TEST_SOURCES "test/*.cpp")
+FILE(GLOB_RECURSE TEST_SOURCES "test/*.cpp")
 
-# add_executable(
-#     run_tests
-#     ${TEST_SOURCES}
-# )
+add_executable(
+    run_tests
+    ${TEST_SOURCES}
+)
 
-# target_link_libraries(
-#     run_tests
-#     GTest::gtest_main
-# )
+target_link_libraries(
+    run_tests
+    GTest::gtest_main
+)
 
-# include(GoogleTest)
-# gtest_discover_tests(run_tests)
+target_include_directories(run_tests PRIVATE ${CMAKE_SOURCE_DIR}/src)
+
+include(GoogleTest)
+gtest_discover_tests(run_tests)
+
 
 #  /$$       /$$$$$$ /$$$$$$$   /$$$$$$
 # | $$      |_  $$_/| $$__  $$ /$$__  $$
