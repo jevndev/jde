@@ -13,11 +13,11 @@ template <typename V, typename AccumulatorType>
 class cumulative_sum_iter {
 public:
     using T = std::ranges::range_value_t<V>;
-    using UnderlyingIteratorT = std::ranges::iterator_t<V>;
-    using difference_type = std::iter_difference_t<UnderlyingIteratorT>;
+    using underlying_iterator_t = std::ranges::iterator_t<V>;
+    using difference_type = std::iter_difference_t<underlying_iterator_t>;
     using value_type = T;
 
-    constexpr explicit cumulative_sum_iter(UnderlyingIteratorT it, UnderlyingIteratorT end,
+    constexpr explicit cumulative_sum_iter(underlying_iterator_t it, underlying_iterator_t end,
                                            AccumulatorType init) noexcept
         : m_curr{it}, m_end{end}, m_accumulator{std::move(init)} {
         if (m_curr != m_end) {
@@ -62,8 +62,8 @@ public:
     [[nodiscard]] constexpr T operator*() const { return m_accumulator; }
 
 private:
-    UnderlyingIteratorT m_curr;
-    UnderlyingIteratorT m_end;
+    underlying_iterator_t m_curr;
+    underlying_iterator_t m_end;
     T m_accumulator;
 };
 
@@ -142,7 +142,7 @@ public:
         : m_pipelines{std::forward<Pipelines>(pipelines)...} {};
 
     template <std::ranges::viewable_range R>
-        requires jde::Tuple<std::ranges::range_value_t<R>>
+        requires jde::tuple<std::ranges::range_value_t<R>>
     constexpr auto operator()(R &&r) const {
         return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
             auto get_nth = [&]<std::size_t I> {

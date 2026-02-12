@@ -14,14 +14,11 @@ template <typename... T>
 overloaded(T...) -> overloaded<T...>;
 
 template <typename Fn>
-requires std::is_invocable_v<Fn>
-struct Default
-{
-    explicit Default(Fn&& fn): m_fn{fn} {}
+    requires std::is_invocable_v<Fn>
+struct otherwise {
+    explicit otherwise(Fn &&fn) : m_fn{fn} {}
 
-    auto operator()([[maybe_unused]] const auto&){
-        return m_fn();
-    }
+    auto operator()([[maybe_unused]] const auto &) { return m_fn(); }
 
 private:
     Fn m_fn;
