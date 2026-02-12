@@ -30,7 +30,7 @@ concept Tuple = EmptyTuple<T> || NonEmptyTuple<T>;
 
 template <typename T>
 concept Hashable = requires(T t) {
-    { std::hash<T>{}(t) } -> std::convertible_to<size_t>;
+    { std::declval<std::hash<T>>()(t) } -> std::convertible_to<size_t>;
 };
 
 template <typename T>
