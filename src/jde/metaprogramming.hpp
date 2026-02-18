@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+#include <format>
 #include <tuple> // IWYU pragma: keep
 #include <type_traits>
 
@@ -52,4 +54,23 @@ using object_type = typename detail::object_type<decltype(Method)>::Type;
 template <typename T, template <typename...> typename Primary>
 inline constexpr bool is_specialization_of_v = detail::is_specialization_of<T, Primary>::value;
 
+template <std::size_t N>
+struct static_string {
+    char data[N]{};
+
+    constexpr static_string(const char (&str)[N]) { std::copy_n(str, N, data); }
+    constexpr operator const char *() const { return data; }
+};
+
 } // namespace jde
+
+template <size_t N>
+struct std::formatter<jde::static_string<N>> {
+    constexpr auto parse(std::format_parse_context &ctx) { return m_formatter.parse(ctx); }
+
+    auto format(const jde::static_string<N> &str, std::format_context &ctx) const {
+        return m_formatter.format(str.data, ctx);
+    }
+
+    std::formatter<const char *> m_formatter;
+};
