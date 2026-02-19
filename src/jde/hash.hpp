@@ -21,8 +21,6 @@ static inline uint32_t murmur3_scramble_32(const uint32_t in) {
 template <std::ranges::range R>
     requires std::convertible_to<std::ranges::range_value_t<R>, uint8_t>
 static inline uint32_t murmur3_32(R &&r, const uint32_t seed = 0xDEADBEEF) {
-    static constexpr auto r1 = 15;
-    static constexpr auto r2 = 13;
     static constexpr auto m = 5;
     static constexpr auto n = 0xe6546b64;
 
@@ -71,8 +69,6 @@ static inline uint64_t murmur3_scramble_64(const uint64_t in) {
 template <std::ranges::range R>
     requires std::convertible_to<std::ranges::range_value_t<R>, uint8_t>
 static inline uint64_t murmur3_64(R &&r, const uint64_t seed = 0xFEEDBABEDEADBEEFULL) {
-    static constexpr auto r1 = 31;
-    static constexpr auto r2 = 27;
     static constexpr auto m = 5;
     static constexpr auto n = 0x85ebca6b85ebca6bULL;
 
