@@ -117,7 +117,9 @@ struct std::formatter<Instance> {
 
         std::format_to(ctx.out(), "\033[");
         (std::format_to(ctx.out(), ";{}", Modifiers::parameter), ...);
-        return std::format_to(ctx.out(), "m{}\033[0m", modifier.m_t);
+        std::format_to(ctx.out(), "m");
+        m_formatter.format(modifier.m_t, ctx);
+        return std::format_to(ctx.out(), "\033[0m");
     }
 
     std::formatter<typename Instance::formatee_t> m_formatter;
