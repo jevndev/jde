@@ -62,6 +62,9 @@ struct static_string {
     constexpr operator const char *() const { return data; }
 };
 
+template <auto Constraint, typename... Ts>
+concept all_satisfy = requires(Ts... ts) { (Constraint(ts), ...); };
+
 } // namespace jde
 
 template <size_t N>
