@@ -201,4 +201,85 @@ private:
 template <typename... Pipelines>
 split_pipeline(Pipelines &&...) -> split_pipeline<Pipelines...>;
 
+namespace detail {
+
+template <typename V>
+class chunk_iter {
+public:
+    using underlying_iterator_t = std::ranges::iterator_t<V>;
+    using difference_type = std::iter_difference_t<underlying_iterator_t>;
+
+    constexpr explicit chunk_iter(underlying_iterator_t it, underlying_iterator_t end,
+                                  std::size_t chunk_size) noexcept
+        : m_curr{it}, m_end{end}, m_chunk_size{chunk_size} {}
+
+    constexpr chunk_iter(const chunk_iter &) = default;
+    constexpr chunk_iter &operator=(const chunk_iter &) = default;
+    constexpr chunk_iter &operator=(chunk_iter &&) = default;
+    constexpr chunk_iter(chunk_iter &&other) noexcept = default;
+    constexpr ~chunk_iter() = default;
+
+    constexpr chunk_iter &operator++() {
+        for (std::size_t i = 0; i < m_chunk_size && m_curr != m_end; ++i) {
+            ++m_curr;
+        }
+        return *this;
+    }
+
+    constexpr chunk_iter operator++(int) {
+        auto tmp = *this;
+        ++(*this);
+        return tmp;
+    }
+
+    [[nodiscard]] constexpr bool operator==(const chunk_iter &rhs) const {
+        return m_curr == rhs.m_curr;
+    }
+
+    [[nodiscard]] constexpr bool operator==(const std::default_sentinel_t) const {
+        return m_curr == m_end;
+    }
+
+    [[nodiscard]] constexpr auto operator*() const {
+        return std::ranges::subrange(m_curr, std::ranges::next(m_curr, m_chunk_size, m_end));
+    }
+
+private:
+    underlying_iterator_t m_curr;
+    underlying_iterator_t m_end;
+    std::size_t m_chunk_size;
+};
+
+template <typename V>
+class chunk_view : public std::ranges::view_interface<chunk_view<V>> {
+public:
+    constexpr explicit chunk_view(V view, std::size_t chunk_size) noexcept
+        : m_range{std::move(view)}, m_chunk_size{chunk_size} {}
+
+    [[nodiscard]] constexpr auto begin() {
+        return chunk_iter<V>{std::ranges::begin(m_range), std::ranges::end(m_range), m_chunk_size};
+    }
+
+    [[nodiscard]] constexpr auto end() const { return std::default_sentinel; }
+
+private:
+    V m_range;
+    std::size_t m_chunk_size;
+};
+
+} // namespace detail
+
+class chunk : public std::ranges::range_adaptor_closure<chunk> {
+public:
+    constexpr explicit chunk(std::size_t chunk_size) noexcept : m_chunk_size{chunk_size} {}
+
+    template <std::ranges::viewable_range R>
+    constexpr auto operator()(R &&r) const {
+        return detail::chunk_view{std::views::all(r), m_chunk_size};
+    }
+
+private:
+    std::size_t m_chunk_size;
+};
+
 } // namespace jde
