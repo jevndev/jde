@@ -1,7 +1,10 @@
 #pragma once
 
 #include <algorithm>
+#include <chrono>
+#include <cmath>
 #include <ranges>
+#include <vector>
 
 #include "jde/concepts.hpp"
 
@@ -133,6 +136,44 @@ template <std::ranges::viewable_range R>
 constexpr auto sum(R &&r) {
     using T = std::ranges::range_value_t<R>;
     return std::ranges::fold_left(std::move(r), T{}, std::plus<T>{});
+}
+
+template <std::ranges::viewable_range R>
+constexpr auto stddev(R &&r) {
+    using T = std::ranges::range_value_t<R>;
+
+    std::vector<T> data;
+    for (const auto &val : r) {
+        data.push_back(val);
+    }
+
+    const auto n = data.size();
+    if (n == 0)
+        return T{};
+
+    if constexpr (jde::is_specialization_of_v<T, std::chrono::duration>) {
+        using Rep = typename T::rep;
+
+        auto mean_val = sum(data) / static_cast<Rep>(n);
+
+        Rep sum_squared_diff = 0;
+        for (const auto &val : data) {
+            auto diff = (val - mean_val).count();
+            sum_squared_diff += diff * diff;
+        }
+
+        return T{static_cast<Rep>(std::sqrt(static_cast<double>(sum_squared_diff) / n))};
+    } else {
+        auto mean_val = sum(data) / static_cast<T>(n);
+
+        T sum_squared_diff{};
+        for (const auto &val : data) {
+            auto diff = val - mean_val;
+            sum_squared_diff += diff * diff;
+        }
+
+        return std::sqrt(sum_squared_diff / static_cast<T>(n));
+    }
 }
 
 template <typename... Pipelines>
