@@ -65,6 +65,11 @@ struct static_string {
 template <auto Constraint, typename... Ts>
 concept all_satisfy = requires(Ts... ts) { (Constraint(ts), ...); };
 
+template <jde::static_string S>
+[[nodiscard]] constexpr auto operator""_ss() {
+    return S;
+}
+
 } // namespace jde
 
 template <size_t N>
