@@ -112,7 +112,7 @@ static inline uint64_t murmur3_64(R &&r, const uint64_t seed = 0xFEEDBABEDEADBEE
 
 template <typename... Ts>
     requires all_satisfy<[](jde::hashable auto) {}, Ts...>
-size_t combine_hashes(const Ts &...ts) {
+[[nodiscard]] size_t combine_hashes(const Ts &...ts) {
     std::vector<uint8_t> hashes;
     hashes.reserve(sizeof...(ts) * sizeof(std::size_t));
     (
@@ -125,5 +125,12 @@ size_t combine_hashes(const Ts &...ts) {
 
     return detail::murmur3_64(hashes);
 }
+
+struct tuple_hash {
+    template <jde::tuple T>
+    [[nodiscard]] constexpr size_t operator()(const T &t) const noexcept {
+        return std::apply([](const auto &...args) { return combine_hashes(args...); }, t);
+    }
+};
 
 } // namespace jde
