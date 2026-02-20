@@ -46,6 +46,12 @@ struct format_spec_builder {
     }
 };
 
+template <static_string prefix, uint8_t R, uint8_t G, uint8_t B>
+[[nodiscard]] consteval auto to_format_spec_string() noexcept {
+    return prefix + to_static_string<R>() + ";" + to_static_string<G>() + ";" +
+           to_static_string<B>();
+}
+
 }; // namespace detail
 
 namespace colors {
@@ -68,6 +74,10 @@ static constexpr auto bright_magenta = detail::format_spec<"95">{};
 static constexpr auto bright_cyan = detail::format_spec<"96">{};
 static constexpr auto bright_white = detail::format_spec<"97">{};
 
+template <uint8_t R, uint8_t G, uint8_t B>
+static constexpr auto rgb =
+    detail::format_spec<detail::to_format_spec_string<"38;2;"_ss, R, G, B>()>{};
+
 }; // namespace foreground
 
 namespace background {
@@ -89,7 +99,12 @@ static constexpr auto bright_magenta = detail::format_spec<"105">{};
 static constexpr auto bright_cyan = detail::format_spec<"106">{};
 static constexpr auto bright_white = detail::format_spec<"107">{};
 
+template <uint8_t R, uint8_t G, uint8_t B>
+static constexpr auto rgb =
+    detail::format_spec<detail::to_format_spec_string<"48;2;"_ss, R, G, B>()>{};
+
 } // namespace background
+
 } // namespace colors
 
 static constexpr auto bold = detail::format_spec<"1">{};

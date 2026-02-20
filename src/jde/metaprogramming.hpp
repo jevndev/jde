@@ -60,7 +60,27 @@ struct static_string {
 
     constexpr static_string(const char (&str)[N]) { std::copy_n(str, N, data); }
     constexpr operator const char *() const { return data; }
+
+    template <std::size_t M>
+    friend constexpr static_string<N + M - 1> operator+(const static_string<N> &lhs,
+                                                        const static_string<M> &rhs) noexcept {
+        char out[N + M - 1];
+        std::copy_n(lhs.data, N - 1, out);
+        std::copy_n(rhs.data, M, out + N - 1);
+        return out;
+    }
+
+    template <std::size_t M>
+    friend constexpr auto operator+(const static_string<N> &lhs, const char (&rhs)[M]) noexcept {
+        return lhs + static_string<M>{rhs};
+    }
 };
+
+template <uint8_t V>
+[[nodiscard]] constexpr auto to_static_string() {
+    char result[] = {'0' + ((V / 100) % 10), '0' + ((V / 10) % 10), '0' + (V % 10), '\0'};
+    return static_string{result};
+}
 
 template <auto Constraint, typename... Ts>
 concept all_satisfy = requires(Ts... ts) { (Constraint(ts), ...); };
