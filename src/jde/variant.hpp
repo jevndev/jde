@@ -1,5 +1,7 @@
 #pragma once
 
+#include <format>
+#include <type_traits>
 #include <utility>
 #include <variant>
 
@@ -30,3 +32,24 @@ constexpr auto visit(auto &&variant, auto &&fns...) {
 }
 
 } // namespace jde
+
+template <typename... Ts>
+struct std::formatter<std::variant<Ts...>> {
+    constexpr auto parse(std::format_parse_context &ctx) {
+        if ((ctx.begin() != ctx.end()) && (*ctx.begin() != '}')) {
+            throw std::format_error("variant formatter does not support format specs yet");
+        }
+        return ctx.begin();
+    }
+
+    constexpr auto format(const std::variant<Ts...> &var, std::format_context &ctx) const {
+        return std::visit(
+            [&ctx, this](const auto &value) {
+                using T = std::remove_cvref_t<decltype(value)>;
+                return std::get<std::formatter<T>>(m_formatters).format(value, ctx);
+            },
+            var);
+    }
+
+    std::tuple<std::formatter<Ts>...> m_formatters;
+};
