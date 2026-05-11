@@ -1,6 +1,7 @@
 #pragma once
 
 #include <__ranges/range_adaptor.h>
+#include <format>
 #include <istream>
 #include <iterator>
 #include <ranges>
@@ -54,3 +55,18 @@ template <typename CharT = char>
 }
 
 }
+
+
+template <>
+struct std::formatter<std::filesystem::path>
+{
+    constexpr auto parse(std::format_parse_context& ctx) noexcept
+    {
+        return ctx.begin();
+    }
+
+    constexpr auto format(const std::filesystem::path& path, std::format_context& ctx) const noexcept
+    {
+        return std::format_to(ctx.out(), "{}", path.string());
+    }
+};
