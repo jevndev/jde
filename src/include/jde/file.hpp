@@ -1,6 +1,5 @@
 #pragma once
 
-#include <__ranges/range_adaptor.h>
 #include <format>
 #include <istream>
 #include <iterator>

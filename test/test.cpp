@@ -1,8 +1,8 @@
-#include "jde/concepts.hpp"
-#include "jde/metaprogramming.hpp"
+#include "jde/all.hpp" // IWYU pragma: keep
 
 #include <iostream>
 #include <vector>
+
 
 struct OStreamable_implementation {
     friend std::ostream &operator<<(std::ostream &os, const OStreamable_implementation &) {
