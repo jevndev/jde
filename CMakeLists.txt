@@ -6,26 +6,55 @@
 # | $$    $$| $$  | $$| $$\  $$$| $$        | $$  | $$  \ $$
 # |  $$$$$$/|  $$$$$$/| $$ \  $$| $$       /$$$$$$|  $$$$$$/
 #  \______/  \______/ |__/  \__/|__/      |______/ \______/
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.24)
+project(jde VERSION 1.0.0)
 
-set(CMAKE_C_COMPILER "/usr/bin/clang-19")
-set(CMAKE_CXX_COMPILER "/usr/bin/clang++-19")
+add_library(jde INTERFACE)
+add_library(jde::jde ALIAS jde)
 
-project(project VERSION 0.0)
+target_include_directories(jde INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/include>
+    $<INSTALL_INTERFACE:include>
+)
 
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+target_compile_features(jde INTERFACE cxx_std_23)
 
-#   /$$$$$$   /$$$$$$  /$$   /$$ /$$$$$$$   /$$$$$$  /$$$$$$$$  /$$$$$$
-#  /$$__  $$ /$$__  $$| $$  | $$| $$__  $$ /$$__  $$| $$_____/ /$$__  $$
-# | $$  \__/| $$  \ $$| $$  | $$| $$  \ $$| $$  \__/| $$      | $$  \__/
-# |  $$$$$$ | $$  | $$| $$  | $$| $$$$$$$/| $$      | $$$$$   |  $$$$$$
-#  \____  $$| $$  | $$| $$  | $$| $$__  $$| $$      | $$__/    \____  $$
-#  /$$  \ $$| $$  | $$| $$  | $$| $$  \ $$| $$    $$| $$       /$$  \ $$
-# |  $$$$$$/|  $$$$$$/|  $$$$$$/| $$  | $$|  $$$$$$/| $$$$$$$$|  $$$$$$/
-#  \______/  \______/  \______/ |__/  |__/ \______/ |________/ \______/
+
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+install(TARGETS jde EXPORT jdeTargets)
+install(DIRECTORY src/include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+install(EXPORT jdeTargets
+    FILE jdeTargets.cmake
+    NAMESPACE jde::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jde
+)
+
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/jdeConfig.cmake.in [[
+@PACKAGE_INIT@
+include("${CMAKE_CURRENT_LIST_DIR}/jdeTargets.cmake")
+check_required_components(jde)
+]])
+
+configure_package_config_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/jdeConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/jdeConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jde
+)
+
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/jdeVersionConfig.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/jdeConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/jdeVersionConfig.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/jde
+)
 
 #  /$$$$$$$$ /$$$$$$$$  /$$$$$$  /$$$$$$$$ /$$$$$$ /$$   /$$  /$$$$$$
 # |__  $$__/| $$_____/ /$$__  $$|__  $$__/|_  $$_/| $$$ | $$ /$$__  $$
@@ -35,51 +64,36 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 #    | $$   | $$       /$$  \ $$   | $$     | $$  | $$\  $$$| $$  \ $$
 #    | $$   | $$$$$$$$|  $$$$$$/   | $$    /$$$$$$| $$ \  $$|  $$$$$$/
 #    |__/   |________/ \______/    |__/   |______/|__/  \__/ \______/
+option(JDE_BUILD_TESTS "Build jde tests" ${PROJECT_IS_TOP_LEVEL})
 
-include(FetchContent)
-FetchContent_Declare(
-    googletest
-    URL https://github.com/google/googletest/archive/df1544bcee0c7ce35cd5ea0b3eb8cc81855a4140.zip
-)
+if(JDE_BUILD_TESTS)
+    include(FetchContent)
+    FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG v1.17.0
+        FIND_PACKAGE_ARGS NAMES GTest
+    )
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
 
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
+    enable_testing()
 
-enable_testing()
+    file(GLOB_RECURSE TEST_SOURCES "test/*.cpp")
 
-FILE(GLOB_RECURSE TEST_SOURCES "test/*.cpp")
+    add_executable(run_tests ${TEST_SOURCES})
 
-add_executable(
-    run_tests
-    ${TEST_SOURCES}
-)
-
-target_link_libraries(
-    run_tests
-    GTest::gtest_main
-)
-
-target_include_directories(run_tests PRIVATE ${CMAKE_SOURCE_DIR}/src)
-
-include(GoogleTest)
-gtest_discover_tests(run_tests)
+    target_link_libraries(run_tests PRIVATE
+        jde::jde
+        GTest::gtest_main
+    )
 
 
-#  /$$       /$$$$$$ /$$$$$$$   /$$$$$$
-# | $$      |_  $$_/| $$__  $$ /$$__  $$
-# | $$        | $$  | $$  \ $$| $$  \__/
-# | $$        | $$  | $$$$$$$ |  $$$$$$
-# | $$        | $$  | $$__  $$ \____  $$
-# | $$        | $$  | $$  \ $$ /$$  \ $$
-# | $$$$$$$$ /$$$$$$| $$$$$$$/|  $$$$$$/
-# |________/|______/|_______/  \______/
+    target_include_directories(run_tests PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+    )
 
-
-#  /$$$$$$$$ /$$$$$$  /$$$$$$$   /$$$$$$  /$$$$$$$$ /$$$$$$$$
-# |__  $$__//$$__  $$| $$__  $$ /$$__  $$| $$_____/|__  $$__/
-#    | $$  | $$  \ $$| $$  \ $$| $$  \__/| $$         | $$
-#    | $$  | $$$$$$$$| $$$$$$$/| $$ /$$$$| $$$$$      | $$
-#    | $$  | $$__  $$| $$__  $$| $$|_  $$| $$__/      | $$
-#    | $$  | $$  | $$| $$  \ $$| $$  \ $$| $$         | $$
-#    | $$  | $$  | $$| $$  | $$|  $$$$$$/| $$$$$$$$   | $$
-#    |__/  |__/  |__/|__/  |__/ \______/ |________/   |__/
+    include(GoogleTest)
+    gtest_discover_tests(run_tests)
+endif()

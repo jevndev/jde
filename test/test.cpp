@@ -2,6 +2,7 @@
 #include "jde/metaprogramming.hpp"
 
 #include <iostream>
+#include <vector>
 
 struct OStreamable_implementation {
     friend std::ostream &operator<<(std::ostream &os, const OStreamable_implementation &) {

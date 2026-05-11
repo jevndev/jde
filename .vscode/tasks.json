@@ -19,7 +19,7 @@
 		{
 			"type": "shell",
 			"label": "build and run",
-			"command": "cmake --build build && ./build/jade",
+			"command": "cmake --build build && ./build/run_tests",
 			"problemMatcher": [],
 			"group": {
 				"kind": "build",
