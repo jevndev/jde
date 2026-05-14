@@ -51,6 +51,9 @@ using object_type = typename detail::object_type<decltype(Method)>::Type;
 
 } // namespace member_function
 
+template <auto Projection, typename T>
+using projection_result_t = std::invoke_result_t<decltype(Projection), T>;
+
 template <typename T, template <typename...> typename Primary>
 inline constexpr bool is_specialization_of_v = detail::is_specialization_of<T, Primary>::value;
 

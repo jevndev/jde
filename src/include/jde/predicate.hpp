@@ -1,26 +1,29 @@
 #pragma once
 
 #include "jde/metaprogramming.hpp"
+
 #include <concepts>
+#include <functional>
 
 namespace jde {
 
 namespace detail {
 
-template <auto Projection, typename Comparator>
+template <auto Projection, template <typename> typename Comparator, typename T>
 concept projection_result_comparable =
-    std::predicate<Comparator, const member_function::return_type<Projection> &,
-                   const member_function::return_type<Projection> &>;
+    std::predicate<Comparator<projection_result_t<Projection, T>>,
+                   const projection_result_t<Projection, T> &,
+                   const projection_result_t<Projection, T> &>;
 
 template <auto Projection, template <typename> typename Predicate>
-    requires projection_result_comparable<Projection,
-                                          Predicate<member_function::return_type<Projection>>>
 struct ProjectingPredicate {
-    [[gnu::always_inline]] [[nodiscard]] constexpr bool
-    operator()(const member_function::object_type<Projection> &lhs,
-               const member_function::object_type<Projection> &rhs) const noexcept {
-        static constexpr auto pred = Predicate<member_function::return_type<Projection>>{};
-        return pred((lhs.*Projection)(), (rhs.*Projection)());
+    template <typename T>
+        requires projection_result_comparable<Projection, Predicate, T>
+    [[gnu::always_inline]] [[nodiscard]] constexpr bool operator()(const T &lhs,
+                                                                   const T &rhs) const noexcept {
+        static constexpr auto pred = Predicate<projection_result_t<Projection, T>>{};
+
+        return pred(std::invoke(Projection, lhs), std::invoke(Projection, rhs));
     }
 };
 
